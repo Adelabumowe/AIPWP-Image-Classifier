@@ -1,12 +1,6 @@
 name: Example workflow for Python using Snyk
 
-on: 
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+on: push
       
 jobs:
   security:
@@ -19,6 +13,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         continue-on-error: true # To make sure that SARIF upload gets called
+      - name: 🔍 Run Semgrep for SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/python-3.10@master
         env:
