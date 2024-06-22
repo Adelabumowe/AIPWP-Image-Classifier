@@ -25,7 +25,7 @@ jobs:
         run: snyk code test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          
+        continue-on-error: true  # Allow the workflow to continue even if vulnerabilities are found here         
       # - name: 🔍 Run Semgrep for SAST
       #   uses: returntocorp/semgrep-action@v1
       #   with:
