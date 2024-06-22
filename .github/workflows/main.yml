@@ -48,51 +48,8 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
 
-      - name: Check if SAST Findings Exist
-        id: check_sast_findings
+      - name: Debug Snyk Code Report
         run: |
-          echo "Checking for SAST findings..."
-          if [[ -s snyk_code_report.json ]]; then
-            if jq -e '.vulnerabilities | length > 0' snyk_code_report.json > /dev/null; then
-              echo "SAST findings detected"
-              echo "findings=true" >> $GITHUB_ENV
-            else
-              echo "No SAST findings detected"
-              echo "findings=false" >> $GITHUB_ENV
-            fi
-          else
-            echo "Snyk report file is empty or missing"
-            echo "findings=false" >> $GITHUB_ENV
-          fi
-
-      - name: Process SAST Findings
-        if: env.findings == 'true'
-        run: |
-          echo "Processing SAST findings..."
-          jq -r '.vulnerabilities[] | "\(.severity) - \(.title) \(.id): \(.description)\nPath: \(.path), line \(.line)\n"' snyk_code_report.json > snyk_code_issues.txt
-
-      - name: Create and Push Fix Branch
-        if: env.findings == 'true'
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git checkout -b snyk-fix-branch
-          echo "Applying fixes..." # Here you would apply actual fixes, if possible
-          git add .
-          git commit -m "fix: apply Snyk fixes"
-          git push --set-upstream origin snyk-fix-branch
-
-      - name: Create Pull Request
-        if: env.findings == 'true'
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "fix: apply Snyk fixes"
-          branch: snyk-fix-branch
-          title: "fix: apply Snyk fixes"
-          body: |
-            This PR includes fixes for vulnerabilities found by Snyk.
-            ```
-            $(cat snyk_code_issues.txt)
-            ```
+          echo "Content of snyk_code_report.json:"
+          cat snyk_code_report.json
           labels: snyk, security
