@@ -48,19 +48,31 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
 
-      - name: Process SAST Findings
-        if: always()
+      - name: Check if SAST Findings Exist
+        id: check_sast_findings
         run: |
-          echo "Processing SAST findings..."
+          echo "Checking for SAST findings..."
           if [[ -s snyk_code_report.json ]]; then
-            echo "SAST findings detected"
-            cat snyk_code_report.json | jq -r '.vulnerabilities[] | "\(.severity) - \(.title) \(.id): \(.description)\nPath: \(.path), line \(.line)\n"' > snyk_code_issues.txt
+            if jq -e '.vulnerabilities | length > 0' snyk_code_report.json > /dev/null; then
+              echo "SAST findings detected"
+              echo "findings=true" >> $GITHUB_ENV
+            else
+              echo "No SAST findings detected"
+              echo "findings=false" >> $GITHUB_ENV
+            fi
           else
-            echo "No SAST findings detected"
+            echo "Snyk report file is empty or missing"
+            echo "findings=false" >> $GITHUB_ENV
           fi
 
+      - name: Process SAST Findings
+        if: env.findings == 'true'
+        run: |
+          echo "Processing SAST findings..."
+          jq -r '.vulnerabilities[] | "\(.severity) - \(.title) \(.id): \(.description)\nPath: \(.path), line \(.line)\n"' snyk_code_report.json > snyk_code_issues.txt
+
       - name: Create and Push Fix Branch
-        if: success() && steps.snyk_code_test.outcome == 'failure'
+        if: env.findings == 'true'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
@@ -71,7 +83,7 @@ jobs:
           git push --set-upstream origin snyk-fix-branch
 
       - name: Create Pull Request
-        if: success() && steps.snyk_code_test.outcome == 'failure'
+        if: env.findings == 'true'
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
