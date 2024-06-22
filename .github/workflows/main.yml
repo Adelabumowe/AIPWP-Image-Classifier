@@ -14,7 +14,7 @@ jobs:
           pip install -r requirements.txt
         continue-on-error: true # To make sure that SARIF upload gets called
       - name: Install Snyk CLI
-        run: pip install snyk
+        run: npm install snyk
       - name: Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
       - name: run Snyk Code Test
