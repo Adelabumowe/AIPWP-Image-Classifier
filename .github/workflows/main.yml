@@ -9,6 +9,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@master
 
+      - name: Install Horusec
+        uses: curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
+
+      - name: Use Horusec for SAST
+        uses: horusec start -p .
       # - name: Install dependencies
       #   run: |
       #     python -m pip install --upgrade pip
