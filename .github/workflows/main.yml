@@ -14,39 +14,18 @@ jobs:
       - name: 🚀 Checkout code
         uses: actions/checkout@master
 
-      # - name: Install Horusec
-      #   run: curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
-
-      # - name: Use Horusec for SAST
-      #   run: horusec start -D
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install -r requirements.txt
-      #   continue-on-error: true # To make sure that SARIF upload gets called
-
       - name: 📥 Install Snyk CLI
         run: npm install -g snyk
 
       - name: ✅ Authenticate Snyk
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
+      - name: 🔍 Run Semgrep for SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
+
       - name: 🔍 Run SAST scans
         run: snyk code test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   continue-on-error: true  # Allow the workflow to continue even if vulnerabilities are found here         
-      # - name: 🔍 Run Semgrep for SAST
-      #   uses: returntocorp/semgrep-action@v1
-      #   with:
-      #     config: auto
-      # - name: Run Snyk to check for vulnerabilities
-      #   uses: snyk/actions/python-3.10@master
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   with:
-      #     args: --sarif-file-output=snyk.sarif
-      # - name: Upload result to Github Code Scanning
-      #   uses: github/codeql-action/upload-sarif@v2
-      #   with:
-      #     sarif_file: snyk.sarif
