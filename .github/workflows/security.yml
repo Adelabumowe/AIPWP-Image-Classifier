@@ -1,0 +1,15 @@
+name: Semgrep SAST scan
+
+on: push
+      
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout code
+        uses: actions/checkout@master
+
+      - name: 🔍 Run Semgrep for SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
