@@ -1,11 +1,6 @@
-name: Snyk SAST scan
+name: Semgrep SAST scan
 
-
-on:
-  pull_request:
-    branches:
-      - master
-      - main
+on: push
       
 jobs:
   security:
@@ -14,18 +9,7 @@ jobs:
       - name: 🚀 Checkout code
         uses: actions/checkout@master
 
-      - name: 📥 Install Snyk CLI
-        run: npm install -g snyk
-
-      - name: ✅ Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-
-      - name: 🔍 Run Semgrep for SAST
+      - name: 🔍 Run Semgrep for SAST(a)
         uses: returntocorp/semgrep-action@v1
         with:
           config: auto
-
-      - name: 🔍 Run SAST scans
-        run: snyk code test
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
