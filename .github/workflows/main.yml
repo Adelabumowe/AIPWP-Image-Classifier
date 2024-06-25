@@ -1,30 +1,15 @@
-name: Example workflow for Python using Snyk
+name: Semgrep SAST scan
 
-on: 
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+on: push
       
 jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: 🚀 Checkout code
         uses: actions/checkout@master
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/python-3.10@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: 🔍 Run Semgrep for SAST(a)
+        uses: returntocorp/semgrep-action@v1
         with:
-          args: --sarif-file-output=snyk.sarif
-      - name: Upload result to Github Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: snyk.sarif
+          config: auto
